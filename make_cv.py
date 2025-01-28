@@ -19,9 +19,10 @@ class CV:
         self.pdf = FPDF()
         self.pdf.add_page()
         self.template = json_template
-        self.bottom_margin = MAIN_FONT_SIZE * PT_TO_MM + LINE_MARGIN
+        self.line_margin = MAIN_FONT_SIZE * PT_TO_MM + LINE_MARGIN
+        self.section_margin = SECTION_TITLE_FONT * PT_TO_MM + PARA_MARGIN
         self.multi_cell_kwargs = {
-            "h": self.bottom_margin, "w": 0,
+            "h": self.line_margin, "w": 0,
             "new_x": "LMARGIN", "new_y": "NEXT",
             "markdown": True
         }
@@ -34,8 +35,12 @@ class CV:
     def make_section_title(self, text: str):
         self.pdf.set_font('Helvetica', size=SECTION_TITLE_FONT, style="B")
         self.pdf.cell(text=text.upper(), new_x="LMARGIN", new_y="NEXT",
-                      h=SECTION_TITLE_FONT * PT_TO_MM + PARA_MARGIN)
+                      h=self.section_margin)
         self.pdf.set_font(size=MAIN_FONT_SIZE)
+
+    def maybe_add_page(self, num_lines: int) -> bool:
+        if self.pdf.will_page_break(self.line_margin * num_lines + self.section_margin):
+            self.pdf.add_page()
 
     def create_cv(self):
         self.add_personal_details()
@@ -45,22 +50,38 @@ class CV:
         return self.pdf
 
     @util.error_handler
+    def add_skills(self):
+        skills = self.template[DN.SKILLS]
+
+
+    @util.error_handler
     def add_education(self):
         education = self.template[DN.EDUCATION]
+        self.maybe_add_page(len(education[0]))
         self.make_section_title("Education")
+        current_y = self.pdf.get_y()
+        left_x = self.pdf.get_x()
+        mid_x = self.pdf.w / 2
+        current_x = left_x
         for edu in education:
+            self.pdf.set_y(current_y)
+            self.pdf.set_x(current_x)
             uni = edu[DN.UNIVERSITY]
             degree = edu[DN.DEGREE]
             dates = edu[DN.DATES]
             comments = edu[DN.COMMENTS]
-            self.pdf.multi_cell(text=f"**{degree}**\n{uni}\n{dates}\n{comments}\n",
+            self.pdf.multi_cell(text=f"**{degree}**\n{uni}\n{dates}\n__{comments}__",
                                 **self.multi_cell_kwargs)
+            current_x = left_x if current_x == mid_x else mid_x
+        self.pdf.ln(PARA_MARGIN / 2)
+        self.draw_line()
 
 
     @util.error_handler
     def add_personal_statement(self):
         personal_statement = self.template[DN.PERSONAL_STATEMENT]
         self.pdf.multi_cell(text=personal_statement, **self.multi_cell_kwargs)
+        self.pdf.ln(PARA_MARGIN / 2)
         self.draw_line()
 
 
@@ -74,17 +95,14 @@ class CV:
             dates=  work[DN.DATES]
             desc = work[DN.DESCRIPTION]
             summary, bullets = util.split_description(desc)
-            # self.pdf.set_font(size=MAIN_FONT_SIZE)
-            self.pdf.multi_cell(w=0, h=self.bottom_margin,
-                                text=f"**{name}**\n__{org}__\n{dates}\n{summary}\n",
-                                markdown=True, new_y="LAST")
+            self.pdf.multi_cell(text=f"**{name}**\n__{org}__\n{dates}\n{summary}",
+                                **self.multi_cell_kwargs)
             for bullet in bullets:
                 self.pdf.circle(x=self.pdf.l_margin + BULLET_MARGIN, y=self.pdf.get_y() + 1.9,
                                 radius=0.5, style='DF')
                 self.pdf.set_x(x=self.pdf.l_margin + BULLET_MARGIN + 3)
                 self.pdf.multi_cell(text=bullet, **self.multi_cell_kwargs)
-            if i < len(work_experience) - 1:
-                self.pdf.ln()
+            self.pdf.ln(PARA_MARGIN/2)
         self.draw_line()
 
     @util.error_handler

@@ -28,3 +28,4 @@ class DataNames:
     COMMENTS = "Comments"
     ORGANISATION = "Organisation"
     DESCRIPTION = "Description"
+    LIST = "List"
