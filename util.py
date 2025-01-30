@@ -49,7 +49,8 @@ def create_empty_template():
             {DN.NAME: "Delivery Boy",
              DN.ORGANISATION: "Planet Express",
              DN.DATES: "01/3000 - present",
-             DN.DESCRIPTION: "Managing challenging clients"}
+             DN.DESCRIPTION: "Managing challenging clients",
+             DN.LIST: ["bullet points here", "as array"]}
         ]
     }
     skills = {
@@ -60,8 +61,7 @@ def create_empty_template():
     }
     cv_template = {
         **personal_details,
-        DN.PERSONAL_STATEMENT: f"Markdown-like styling: **bold**, __italics__, --underlined--."
-                               f" For bullet points use {co.BULLET_RE}",
+        DN.PERSONAL_STATEMENT: "Markdown-like styling: **bold**, __italics__, --underlined--.",
         **work_experience,
         **education,
         **skills

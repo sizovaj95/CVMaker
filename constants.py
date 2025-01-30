@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 templates_folder = Path(__file__).parent.resolve() / "templates"
+fonts_folder = Path(__file__).parent.resolve() / "fonts"
 
 BULLET_RE = "<*>"
 
