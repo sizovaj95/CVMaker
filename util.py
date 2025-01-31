@@ -1,4 +1,5 @@
 import json
+import re
 
 import constants as co
 from constants import DataNames as DN
@@ -23,6 +24,11 @@ def error_handler(func):
         except KeyError:
             return
     return wrapper
+
+
+def remove_double_spaces(text: str) -> str:
+    text = re.subn(r"\s{2,}", " ", text)[0]
+    return text
 
 
 def create_empty_template():
