@@ -1,6 +1,7 @@
 import json
 from copy import deepcopy
 import math
+import logging
 
 import fpdf.errors
 from fpdf import FPDF
@@ -203,7 +204,10 @@ def main():
         doc_name = f"{cv_maker.person_name}.pdf"
     else:
         doc_name = "CV.pdf"
-    cv.output(doc_name)
+    try:
+        cv.output(doc_name)
+    except PermissionError:
+        logging.warning("The pdf you are trying to modify is open! Close it and try again.")
 
 
 if __name__ == "__main__":

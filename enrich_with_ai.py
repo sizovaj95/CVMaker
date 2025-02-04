@@ -11,7 +11,7 @@ load_dotenv()
 client = openai.OpenAI()
 template_name = "example.json"
 
-system_msg = "You are assisting with creating sections for CV. Be short and clear, give no more than 3 sentences."
+system_msg = "You are assisting with creating sections for CV. Be short and clear, give no more than 3 sentences. Do not make facts up."
 user_msg = "Write a personal statement for a CV based on person's work experience, skills and job description requirements."
 
 cv_str = ''
