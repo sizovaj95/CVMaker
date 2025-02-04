@@ -23,8 +23,8 @@ def get_data_from_cv() -> str:
         return cv_str
     with open(co.templates_folder / template_name, "r", encoding="utf-8") as f:
         cv = json.load(f)
-    work_experience = cv.get(co.DataNames.WORK_EXPERIENCE)
-    skills = cv.get(co.DataNames.SKILLS)
+    work_experience = cv.get(co.DataNames.WORK_EXPERIENCE, [])
+    skills = cv.get(co.DataNames.SKILLS, [])
     work_experience_str = 'Work experience:\n'
     for work in work_experience:
         for k, v in work.items():
