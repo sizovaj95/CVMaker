@@ -6,18 +6,6 @@ import constants as co
 from constants import DataNames as DN
 
 
-def split_description(description: str) -> tuple[str, list]:
-    try:
-        first_bullet_ind = description.index(co.BULLET_RE)
-    except ValueError:
-        return description, []
-    summary = description[:first_bullet_ind]
-    bullets = description[first_bullet_ind:].split(co.BULLET_RE)
-    bullets = [b.strip() for b in bullets]
-    bullets = [b for b in bullets if b]
-    return summary, bullets
-
-
 def error_handler(func):
     def wrapper(*args, **kwargs):
         try:
@@ -30,6 +18,12 @@ def error_handler(func):
 def remove_double_spaces(text: str) -> str:
     text = re.subn(r"\s{2,}", " ", text)[0]
     return text
+
+
+def load_cv(template_name: str) -> str:
+    with open(co.templates_folder / template_name, "r", encoding="utf-8") as f:
+        cv = json.load(f)
+    return json.dumps(cv)
 
 
 def create_empty_template():
@@ -82,6 +76,12 @@ def create_empty_template():
         os.mkdir(co.templates_folder)
     with open(co.templates_folder / "example_template.json", "w", encoding="utf-8") as f:
         json.dump(cv_template, f, indent=2)
+
+
+def clean_text(text: str) -> str:
+    text = re.subn(r"\n{2,}", "\n", text)[0]
+    text = remove_double_spaces(text)
+    return text.strip()
 
 
 if __name__ == "__main__":

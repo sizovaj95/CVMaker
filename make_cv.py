@@ -10,6 +10,7 @@ from constants import DataNames as DN
 import constants as co
 import util
 
+NAME_FONT = 26
 SECTION_TITLE_FONT = 12
 MAIN_FONT_SIZE = 11
 PT_TO_MM = 0.3528
@@ -46,15 +47,15 @@ class CV:
                       h=self.section_margin)
         self.pdf.set_font(size=MAIN_FONT_SIZE)
 
-    def maybe_add_page(self, num_lines: int) -> bool:
+    def maybe_add_page(self, num_lines: int):
         if self.pdf.will_page_break(self.line_margin * num_lines + self.section_margin):
             self.pdf.add_page()
 
     def add_font(self, name: str):
         self.pdf.add_font(name, style="", fname=co.fonts_folder / name / f"{name}-Regular.ttf")
-        self.pdf.add_font(name, style="b", fname=co.fonts_folder / name / f"{name}-ExtraBold.ttf")
-        self.pdf.add_font(name, style="i", fname=co.fonts_folder / name / f"{name}-Italic.ttf")
-        self.pdf.add_font(name, style="bi", fname=co.fonts_folder / name / f"{name}-BoldItalic.ttf")
+        self.pdf.add_font(name, style="B", fname=co.fonts_folder / name / f"{name}-ExtraBold.ttf")
+        self.pdf.add_font(name, style="I", fname=co.fonts_folder / name / f"{name}-Italic.ttf")
+        self.pdf.add_font(name, style="BI", fname=co.fonts_folder / name / f"{name}-BoldItalic.ttf")
 
     def make_bullet_points_list(self, x, y, values_list: list[str], cell_kwargs: dict):
         self.pdf.set_y(y)
@@ -111,23 +112,28 @@ class CV:
         education = self.template[DN.EDUCATION]
         self.maybe_add_page(len(education[0]))
         self.make_section_title("Education")
-        current_y = self.pdf.get_y()
+        y = self.pdf.get_y()
         left_x = self.pdf.get_x()
         mid_x = self.pdf.w / 2
         current_x = left_x
         multi_cell_kwargs = deepcopy(self.multi_cell_kwargs)
         multi_cell_kwargs['w'] = self.col_width
+        max_y = self.pdf.get_y()
         for edu in education:
-            self.pdf.set_y(current_y)
+            self.pdf.set_y(y)
             self.pdf.set_x(current_x)
             uni = edu[DN.UNIVERSITY]
             degree = edu[DN.DEGREE]
             dates = edu[DN.DATES]
             comments = edu[DN.COMMENTS]
-            text = f"**{degree}**\n{uni}\n{dates}\n__{comments}__"
+            text = f"**{degree}**\n{uni}\n{dates}\n{comments}"
             text = util.remove_double_spaces(text)
             self.pdf.multi_cell(text=text, **multi_cell_kwargs)
             current_x = left_x if current_x == mid_x else mid_x
+            current_y = self.pdf.get_y()
+            if current_y > max_y:
+                max_y = current_y
+        self.pdf.set_y(max_y)
         self.pdf.ln(PARA_MARGIN / 2)
         self.draw_line()
 
@@ -182,15 +188,13 @@ class CV:
         text = f"**Email:** {email}\n**Tel:** {telephone}\n**Address:** {address}\n" + websites_text
         text = util.remove_double_spaces(text)
 
-        self.pdf.set_font(size=26, style="B")
+        self.pdf.set_font(size=NAME_FONT, style="B")
         self.pdf.cell(w=self.pdf.w / 2, text=name.upper(), new_x="LMARGIN", new_y="NEXT")
-        self.pdf.set_font(size=12, style="B")
+        self.pdf.set_font(size=SECTION_TITLE_FONT, style="B")
         self.pdf.cell(w=self.pdf.w / 2, text=current_position.upper(), new_x="RIGHT",
-                      new_y="TMARGIN", h=12*PT_TO_MM+PARA_MARGIN)
+                      new_y="TMARGIN", h=self.section_margin)
         self.pdf.set_font(size=MAIN_FONT_SIZE)
-        self.pdf.multi_cell(w=0, h=MAIN_FONT_SIZE*PT_TO_MM + LINE_MARGIN,
-                            text=text,
-                            markdown=True, align="R")
+        self.pdf.multi_cell(w=0, h=self.line_margin, text=text, markdown=True, align="R")
         self.person_name = name.title()
 
 
