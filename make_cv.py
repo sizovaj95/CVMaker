@@ -110,31 +110,33 @@ class CV:
     @util.error_handler
     def add_education(self):
         education = self.template[DN.EDUCATION]
-        self.maybe_add_page(len(education[0]))
         self.make_section_title("Education")
-        y = self.pdf.get_y()
-        left_x = self.pdf.get_x()
-        mid_x = self.pdf.w / 2
-        current_x = left_x
         multi_cell_kwargs = deepcopy(self.multi_cell_kwargs)
         multi_cell_kwargs['w'] = self.col_width
-        max_y = self.pdf.get_y()
-        for edu in education:
-            self.pdf.set_y(y)
-            self.pdf.set_x(current_x)
-            uni = edu[DN.UNIVERSITY]
-            degree = edu[DN.DEGREE]
-            dates = edu[DN.DATES]
-            comments = edu[DN.COMMENTS]
-            text = f"**{degree}**\n{uni}\n{dates}\n{comments}"
-            text = util.remove_double_spaces(text)
-            self.pdf.multi_cell(text=text, **multi_cell_kwargs)
-            current_x = left_x if current_x == mid_x else mid_x
-            current_y = self.pdf.get_y()
-            if current_y > max_y:
-                max_y = current_y
-        self.pdf.set_y(max_y)
-        self.pdf.ln(PARA_MARGIN / 2)
+        left_x = self.pdf.l_margin
+        mid_x = self.pdf.w / 2
+        education_pairs = [education[i:i+2] for i in range(0, len(education), 2)]
+        for edu_pair in education_pairs:
+            self.maybe_add_page(len(edu_pair[0]) + 1)
+            pair_y = self.pdf.get_y()
+            current_x = left_x
+            max_y = self.pdf.get_y()
+            for edu in edu_pair:
+                self.pdf.set_y(pair_y)
+                self.pdf.set_x(current_x)
+                uni = edu[DN.UNIVERSITY]
+                degree = edu[DN.DEGREE]
+                dates = edu[DN.DATES]
+                comments = edu[DN.COMMENTS]
+                text = f"**{degree}**\n{uni}\n{dates}\n{comments}"
+                text = util.remove_double_spaces(text)
+                self.pdf.multi_cell(text=text, **multi_cell_kwargs)
+                current_x = left_x if current_x == mid_x else mid_x
+                current_y = self.pdf.get_y()
+                if current_y > max_y:
+                    max_y = current_y
+            self.pdf.set_y(max_y)
+            self.pdf.ln(PARA_MARGIN / 2)
         self.draw_line()
 
 
